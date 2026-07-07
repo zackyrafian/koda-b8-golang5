@@ -12,27 +12,11 @@ type User struct {
   Password string
 }
 
-var token = User {}
-var accounts = []User { 
-  {
-    FirstName: "John",
-    LastName: "Doe",
-    Email: "test@example.com",
-    Password: "test",
-  },
-  {
-    FirstName: "Lawak",
-    LastName: "Test",
-    Email: "lawak@example.com",
-    Password: "test",
-  },
-  {
-    FirstName: "a",
-    LastName: "a",
-    Email: "a",
-    Password: "a",
-  },
+type UserStore struct { 
+  accounts []*User
+  token *User
 }
+
 func clearTerminal() { 
   fmt.Print("\x1B[2J\x1B[H")
 }
@@ -42,26 +26,27 @@ func MD5(text string) string {
   return hex.EncodeToString(hash[:])
 }
 
-func dashboard() { 
+func (us *UserStore) dashboard() { 
   clearTerminal()
   var question string
   fmt.Print("Welcome to system\n")
-  fmt.Printf("\nHello %s %s", token.FirstName, token.LastName)
+  fmt.Printf("\nHello %s %s", us.token.FirstName, us.token.LastName)
   fmt.Print("\n1. List All Users\n2. Logout\n\n0. Exit\n\n")
 
   fmt.Print("Choose a menu: ")
   fmt.Scan(&question)
   switch question {
-    case "1": listAllUsers()
+    case "1": us.listAllUsers()
     case "2":
     case "0": 
-    default: dashboard()
+    default: us.dashboard()
   }
 }
 
-func listAllUsers(){ 
+func (us *UserStore) listAllUsers(){ 
+  clearTerminal()
   fmt.Print("List all users\n")
-  for idx, user := range accounts{ 
+  for idx, user := range us.accounts { 
     fmt.Printf("%d.\n", idx + 1)
     fmt.Printf("Fullname: %s %s\n", user.FirstName, user.LastName)
     fmt.Printf("Email: %s\n", user.Email)
@@ -69,26 +54,32 @@ func listAllUsers(){
   }
   fmt.Print("Press enter to back ")
   fmt.Scanln()
-  defer dashboard()
+  defer us.dashboard()
 }
 
-func register(){ 
+func (us *UserStore) register(){ 
   clearTerminal()
   fmt.Println("Register")
   fmt.Print("")
   reg := User{}
-
+  var password, confirmPassword string
+  
   fmt.Print("What is you first name: ")
   fmt.Scan(&reg.FirstName)
   fmt.Print("What is you last name: ")
   fmt.Scan(&reg.LastName)
   fmt.Print("What is you email: ")
   fmt.Scan(&reg.Email)
-  var password string
   fmt.Print("Enter a strong password : ")
   fmt.Scan(&password)
-  reg.Password = MD5(password)
+  fmt.Print("Enter a confirm password : ")
+  fmt.Scan(&confirmPassword)
 
+  if password != confirmPassword {
+    us.register()
+  }
+  
+  reg.Password = MD5(password)
   var confirm string
   fmt.Print("Is it true?\n")
   fmt.Printf("First Name: %s\n", reg.FirstName)
@@ -98,21 +89,22 @@ func register(){
   fmt.Scan(&confirm)
 
   if confirm != "y" { 
-    register()
+    us.register()
   }
-  accounts = append(accounts, reg)
+  us.accounts = append(us.accounts, &reg)
   fmt.Print("Register Success, press enter to back..")
-  defer home()
+  fmt.Scanln()
+  defer us.home()
 }
 
-func login() {  
+func (us *UserStore) login() {  
     clearTerminal()
-    loginForm := User{}
-    fmt.Println("Login")
+    loginForm := &User{}
+    fmt.Print("Login\n\n")
     fmt.Print("Enter your email: ")
     fmt.Scan(&loginForm.Email)
     idx := -1
-    for index, x := range accounts{ 
+    for index, x := range us.accounts{ 
       if x.Email == loginForm.Email {
         idx = index
       }
@@ -121,44 +113,45 @@ func login() {
     if idx != -1 { 
       fmt.Print("Enter your password: ")
       fmt.Scan(&loginForm.Password)
-      if MD5(loginForm.Password) != accounts[idx].Password { 
-        login()
+      if MD5(loginForm.Password) != us.accounts[idx].Password { 
+        us.login()
       } else {
-        token = accounts[idx]
-        dashboard()
+        us.token = us.accounts[idx]
+        us.dashboard()
       }
     } else { 
-      login()
+      us.login()
     }
 }
 
-func forgetPassword(){ 
+func (us *UserStore)forgetPassword(){ 
   fmt.Println("Forget Password")
 }
 
-func home() { 
+func (us *UserStore)home() { 
   clearTerminal()
   var q string
-  fmt.Println("Welcome to system")
+  fmt.Print("Welcome to system\n\n")
   fmt.Print("1. Register\n2. Login\n3. Forget Password\n\n0. Exit")
   fmt.Print("\nChoose a menu: ")
   fmt.Scan(&q)
   
   switch q { 
     case "1": 
-      register()
+      us.register()
     case "2": 
-      login()
+      us.login()
     case "3": 
-      forgetPassword()
+      us.forgetPassword()
     default: 
-      home()
+      us.home()
   }
 }
 
 
 func main() { 
-  home()
+  us := &UserStore{}
+  us.home()
   // register()
   // login()
   // 
