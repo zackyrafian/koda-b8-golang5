@@ -37,6 +37,16 @@ func dashboard() {
   fmt.Print("\n1. List All Users\n2. Logout\n\n0. Exit")
 }
 
+func listAllUsers(){ 
+  fmt.Println("List all users")
+  for idx, user := range accounts{ 
+    fmt.Printf("%d.\n", idx + 1)
+    fmt.Printf("Fullname: %s %s\n", user.FirstName, user.LastName)
+    fmt.Printf("Email: %s\n", user.Email)
+    fmt.Printf("Password: %s\n\n", user.Password)
+  }
+}
+
 func register(){ 
   clearTerminal()
   fmt.Println("Register")
@@ -125,7 +135,7 @@ func home() {
 
 
 func main() { 
-  home()
+  listAllUsers()
   // register()
   // login()
 }
