@@ -1,8 +1,9 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
-
 )
 type User struct { 
   FirstName string
@@ -25,26 +26,50 @@ var accounts = []User {
     Email: "lawak@example.com",
     Password: "test",
   },
+  {
+    FirstName: "a",
+    LastName: "a",
+    Email: "a",
+    Password: "a",
+  },
 }
 func clearTerminal() { 
   fmt.Print("\x1B[2J\x1B[H")
 }
 
+func MD5(text string) string {
+  hash := md5.Sum([]byte(text))
+  return hex.EncodeToString(hash[:])
+}
+
 func dashboard() { 
   clearTerminal()
-  fmt.Print("Welcome to system")
+  var question string
+  fmt.Print("Welcome to system\n")
   fmt.Printf("\nHello %s %s", token.FirstName, token.LastName)
-  fmt.Print("\n1. List All Users\n2. Logout\n\n0. Exit")
+  fmt.Print("\n1. List All Users\n2. Logout\n\n0. Exit\n\n")
+
+  fmt.Print("Choose a menu: ")
+  fmt.Scan(&question)
+  switch question {
+    case "1": listAllUsers()
+    case "2":
+    case "0": 
+    default: dashboard()
+  }
 }
 
 func listAllUsers(){ 
-  fmt.Println("List all users")
+  fmt.Print("List all users\n")
   for idx, user := range accounts{ 
     fmt.Printf("%d.\n", idx + 1)
     fmt.Printf("Fullname: %s %s\n", user.FirstName, user.LastName)
     fmt.Printf("Email: %s\n", user.Email)
     fmt.Printf("Password: %s\n\n", user.Password)
   }
+  fmt.Print("Press enter to back ")
+  fmt.Scanln()
+  defer dashboard()
 }
 
 func register(){ 
@@ -59,12 +84,10 @@ func register(){
   fmt.Scan(&reg.LastName)
   fmt.Print("What is you email: ")
   fmt.Scan(&reg.Email)
+  var password string
   fmt.Print("Enter a strong password : ")
-  fmt.Scan(&reg.Password)
-  fmt.Print("Enter a strong password : ")
-  fmt.Scan(&reg.Password)
-
-  fmt.Print("\n")
+  fmt.Scan(&password)
+  reg.Password = MD5(password)
 
   var confirm string
   fmt.Print("Is it true?\n")
@@ -98,7 +121,7 @@ func login() {
     if idx != -1 { 
       fmt.Print("Enter your password: ")
       fmt.Scan(&loginForm.Password)
-      if loginForm.Password != accounts[idx].Password { 
+      if MD5(loginForm.Password) != accounts[idx].Password { 
         login()
       } else {
         token = accounts[idx]
@@ -135,7 +158,11 @@ func home() {
 
 
 func main() { 
-  listAllUsers()
+  home()
   // register()
   // login()
+  // 
+  //  
+  // 
+  
 }
