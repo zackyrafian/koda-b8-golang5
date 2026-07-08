@@ -7,6 +7,23 @@ on:
         - 'v*'
 
 jobs: 
+  release-app:
+      name: "Release builded app"
+      needs: build-app
+      runs-on: ubuntu-latest
+      steps:
+        - name: Download artifact
+          uses: actions/download-artifact@v8
+          with:
+            artifact-ids: ${{needs.build-app.outputs.output1}}
+        - name: Compress artifact
+          run: zip -r go-auth.zip ./*
+        - name: Release
+          uses: softprops/action-gh-release@v3
+          with:
+            files: |
+              go-auth.zip
+            
   build-docker-image:
       name: "Build Docker image"
       runs-on: ubuntu-latest
