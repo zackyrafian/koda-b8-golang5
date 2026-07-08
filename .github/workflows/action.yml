@@ -13,8 +13,7 @@ permissions:
 jobs: 
 
   release-app:
-      name: "Release builded app Linux"
-      needs: rules-tag
+      name: "Release builded"
       runs-on: ubuntu-latest
       steps:
         - name: get source
