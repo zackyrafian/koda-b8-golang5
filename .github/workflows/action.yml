@@ -11,6 +11,34 @@ permissions:
   packages: write
 
 jobs: 
+
+  release-app:
+      name: "Release builded app Linux"
+      needs: rules-tag
+      runs-on: ubuntu-latest
+      steps:
+        - name: get source
+          uses: actions/checkout@v6
+        - name: setup golang
+          uses: actions/setup-go@v6
+          with:
+            go-version-file: go.mod
+        - name: install go deps
+          run: go mod tidy
+        - name: build app Linux64
+          run: go build -o auth-linux64 main.go
+        - name: build app Windows
+          run: GOOS=windows GOARCH=amd64 go build -o auth-windows.exe main.go
+        - name: build app MacOS ARM64
+          run: GOOS=darwin GOARCH=arm64 go build -o auth-darwin main.go
+        - name: Release
+          uses: softprops/action-gh-release@v3
+          with:
+            files: |
+              auth-linux64
+              auth-windows.exe
+              auth-darwin-arm64
+              
   build-docker-image:
       name: "Build Docker Image"
       runs-on: ubuntu-latest
@@ -27,15 +55,4 @@ jobs:
         - name: Push to ghcr.io
           run: docker push ghcr.io/${{github.repository}}:latest
           
-  release-linux-amd64:
-      name: release linux/amd64
-      runs-on: ubuntu-latest
-      steps:
-      - uses: actions/checkout@master
-      - name: compile and release
-        uses: ngs/go-release.action@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GOARCH: amd64
-          GOOS: linux
-          EXTRA_FILES: "LICENSE"
+  
