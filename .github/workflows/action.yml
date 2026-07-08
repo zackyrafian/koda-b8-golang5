@@ -23,7 +23,7 @@ jobs:
         goarch: amd64
             
   build-docker-image:
-      name: "Build Docker image"
+      name: "Build Docker Image"
       runs-on: ubuntu-latest
       steps:
         - name: Checkout code
